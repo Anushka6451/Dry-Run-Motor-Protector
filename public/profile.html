@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#6C5CE7">
+<title>Profile & Device — Pump Protector</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+  <div class="app-header">
+    <div class="title-block">
+      <h2>Profile & Setup</h2>
+      <p>Account & device hardware</p>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- User Account -->
+    <div class="card">
+      <div class="profile-row">
+        <div class="avatar" id="profileAvatar">F</div>
+        <div>
+          <div class="pname" id="profileName">Farmer</div>
+          <div class="pemail" id="profileEmail">farmer@borewell.io</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hardware & Cloud Configuration -->
+    <div class="card">
+      <span class="label-sm" style="display:block; margin-bottom:10px;">Hardware Specifications</span>
+      <div class="settings-row"><span>Microcontroller</span><span class="value">ESP32 DevKit V1</span></div>
+      <div class="settings-row"><span>Firmware</span><span class="value">v2.0 Motor Protector</span></div>
+      <div class="settings-row"><span>Template</span><span class="value">Ashwin (TMPL3p-CzNFT1)</span></div>
+      <div class="settings-row"><span>Relay Pin</span><span class="value" id="profRelayPin">V0 (GPIO 4)</span></div>
+      <div class="settings-row"><span>Water ADC Pin</span><span class="value">V3 (GPIO 36 / VP)</span></div>
+      <div class="settings-row"><span>Blynk Region</span><span class="value" id="profRegion">BLR1</span></div>
+      <div class="settings-row"><span>Live Connection</span><span class="value" id="profileConn" style="color:var(--green-dark);">Checking…</span></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="doLogout()" style="background:var(--red); box-shadow:0 8px 20px rgba(239,68,68,0.3);">
+      Log Out
+    </button>
+  </div>
+
+  <div id="bottomNav"></div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  requireAuth();
+  injectNav('profile');
+
+  const auth = loadAuth();
+  if (auth) {
+    document.getElementById('profileName').textContent = auth.name || 'Farmer';
+    document.getElementById('profileEmail').textContent = auth.email || 'farmer@borewell.io';
+    document.getElementById('profileAvatar').textContent = (auth.name || 'F').charAt(0).toUpperCase();
+  }
+
+  startPolling((state, reachable, live) => {
+    const label = connLabel(reachable, live);
+    const connEl = document.getElementById('profileConn');
+    connEl.textContent = label;
+    connEl.style.color = live ? 'var(--green-dark)' : 'var(--red-dark)';
+
+    if (state.device) {
+      if (state.device.region) document.getElementById('profRegion').textContent = state.device.region.toUpperCase();
+      if (state.device.relayPin) document.getElementById('profRelayPin').textContent = `${state.device.relayPin} (Relay)`;
+    }
+  });
+</script>
+</body>
+</html>
